@@ -1,0 +1,186 @@
+# ============================================================
+# Docker Compose — Arsitektur Multi-Service Apotek POS
+# Terbagi menjadi layanan independen yang teroptimasi,
+# hemat sumber daya (RAM & CPU), dan tidak membebani host.
+# ============================================================
+
+services:
+  # ── 1. Gateway (Nginx Reverse Proxy & Static Cache) ──
+  # Bertanggung jawab menangani koneksi klien, kompresi Gzip,
+  # caching file statis, dan membagi beban antara Web & API.
+  gateway:
+    build:
+      context: ./docker/gateway
+      dockerfile: Dockerfile
+    container_name: apotek-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "3000:80"
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - apotek-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+        reservations:
+          memory: 16M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1/healthz || exit 1"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  # ── 2. Web Frontend (Next.js Standalone POS & Dashboard) ──
+  # Menjalankan antarmuka kasir, resep, inventaris, dan dashboard.
+  # Menggunakan output standalone untuk memangkas ukuran image & RAM.
+  web:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: apotek-web
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    volumes:
+      - apotek_shared_data:/app/data
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - apotek-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 384M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+
+  # ── 3. Backend API (Express / Core Business Logic & Stock Engine) ──
+  # Khusus melayani transaksi kasir, kalkulasi resep FEFO,
+  # mutasi inventaris, dan import/export katalog obat.
+  api:
+    build:
+      context: ./docker/api
+      dockerfile: Dockerfile
+    container_name: apotek-api
+    restart: unless-stopped
+    environment:
+      - PORT=5000
+      - DATA_DIR=/app/data
+      - DATABASE_URL=postgresql://apotek_user:apotek_secret@db:5432/apotek_db
+    volumes:
+      - apotek_shared_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - apotek-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 256M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:5000/healthz || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # ── 4. Database (PostgreSQL 16 Alpine Low-Memory) ──
+  # Basis data relasional terpusat dengan tuning profil ringan
+  # (shared_buffers 64MB) agar tidak memakan RAM server kasir.
+  db:
+    image: postgres:16-alpine
+    container_name: apotek-db
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=2MB
+      -c maintenance_work_mem=16MB
+      -c max_connections=30
+      -c effective_cache_size=128MB
+    environment:
+      POSTGRES_DB: apotek_db
+      POSTGRES_USER: apotek_user
+      POSTGRES_PASSWORD: apotek_secret
+      TZ: Asia/Jakarta
+    volumes:
+      - apotek_pg_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - apotek-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apotek_user -d apotek_db"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ── 5. Background Worker (Audit Kedaluwarsa & Auto Backup) ──
+  # Berjalan di latar belakang untuk memperbarui status EXP batch
+  # dan backup harian tanpa mengganggu antrian transaksi di kasir.
+  worker:
+    build:
+      context: ./docker/worker
+      dockerfile: Dockerfile
+    container_name: apotek-worker
+    restart: unless-stopped
+    environment:
+      - DATA_DIR=/app/data
+      - CHECK_INTERVAL_SECONDS=3600
+    volumes:
+      - apotek_shared_data:/app/data
+    depends_on:
+      - api
+    networks:
+      - apotek-net
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          memory: 16M
+
+# ── Volume Terisolasi untuk Persistensi Data ──
+volumes:
+  apotek_pg_data:
+    name: apotek_pg_data
+  apotek_shared_data:
+    name: apotek_shared_data
+
+# ── Jaringan Internal Terisolasi ──
+networks:
+  apotek-net:
+    name: apotek-network
+    driver: bridge

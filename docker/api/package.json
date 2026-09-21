@@ -1,0 +1,14 @@
+{
+  "name": "apotek-api-service",
+  "version": "1.0.0",
+  "description": "Layanan Backend API Mandiri untuk Apotek POS",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}

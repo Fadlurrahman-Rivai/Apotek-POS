@@ -1,0 +1,9 @@
+{
+  "name": "apotek-background-worker",
+  "version": "1.0.0",
+  "description": "Layanan Background Worker untuk Audit Kedaluwarsa & Auto-Backup Apotek",
+  "main": "worker.js",
+  "scripts": {
+    "start": "node worker.js"
+  }
+}
