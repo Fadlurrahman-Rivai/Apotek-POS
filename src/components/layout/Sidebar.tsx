@@ -114,14 +114,82 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile hamburger button */}
-      <button
-        className="sidebar-mobile-toggle"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Buka menu navigasi"
-      >
-        {icons.menu}
-      </button>
+      {/* Mobile Top Header */}
+      <header className="mobile-top-bar">
+        <button
+          type="button"
+          className="mobile-top-menu-btn"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Buka menu navigasi"
+        >
+          {icons.menu}
+        </button>
+
+        <Link href="/" className="mobile-top-brand">
+          <div className="mobile-top-logo-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </div>
+          <div>
+            <div className="mobile-top-title">Apotek POS</div>
+            <div className="mobile-top-subtitle">Sistem Kasir</div>
+          </div>
+        </Link>
+
+        {user && (
+          <div className="mobile-top-user">
+            <span className="mobile-top-role">{user.role === 'ADMIN' ? 'Admin' : 'Kasir'}</span>
+            <span className="mobile-top-avatar">{user.avatar || (user.role === 'ADMIN' ? '👨‍⚕️' : '👩‍💼')}</span>
+          </div>
+        )}
+      </header>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <Link
+          href="/"
+          className={`mobile-bottom-item ${pathname === '/' ? 'active' : ''}`}
+          onClick={() => setMobileOpen(false)}
+        >
+          <span className="mobile-bottom-icon">{icons.dashboard}</span>
+          <span className="mobile-bottom-label">Dashboard</span>
+        </Link>
+        <Link
+          href="/pos"
+          className={`mobile-bottom-item ${pathname.startsWith('/pos') ? 'active' : ''}`}
+          onClick={() => setMobileOpen(false)}
+        >
+          <span className="mobile-bottom-icon">{icons.pos}</span>
+          <span className="mobile-bottom-label">Kasir</span>
+        </Link>
+        <Link
+          href="/gudang"
+          className={`mobile-bottom-item ${pathname.startsWith('/gudang') ? 'active' : ''}`}
+          onClick={() => setMobileOpen(false)}
+        >
+          <span className="mobile-bottom-icon">{icons.warehouse}</span>
+          <span className="mobile-bottom-label">Gudang</span>
+        </Link>
+        <Link
+          href="/inventory"
+          className={`mobile-bottom-item ${pathname.startsWith('/inventory') ? 'active' : ''}`}
+          onClick={() => setMobileOpen(false)}
+        >
+          <span className="mobile-bottom-icon">{icons.inventory}</span>
+          <span className="mobile-bottom-label">Katalog</span>
+        </Link>
+        <button
+          type="button"
+          className={`mobile-bottom-item ${mobileOpen ? 'active' : ''}`}
+          onClick={() => setMobileOpen(true)}
+          aria-label="Menu navigasi lengkap"
+        >
+          <span className="mobile-bottom-icon">{icons.menu}</span>
+          <span className="mobile-bottom-label">Menu</span>
+        </button>
+      </nav>
 
       {/* Overlay for mobile view */}
       {mobileOpen && (

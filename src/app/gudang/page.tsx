@@ -1861,9 +1861,9 @@ export default function GudangPage() {
             </div>
 
             <form onSubmit={handleSaveManualMedicine}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '18px 24px' }}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* Row 1: Nama Barang & Kategori */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                <div className="gudang-form-row-2col">
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">
                       Nama Barang / Obat <span style={{ color: 'var(--red-500)' }}>*</span>
@@ -1924,7 +1924,7 @@ export default function GudangPage() {
                       padding: '14px 16px',
                     }}
                   >
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="gudang-form-row-equal">
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label" style={{ fontWeight: 600, color: 'var(--teal-900)' }}>
                           Satuan Kemasan Box
@@ -2008,16 +2008,7 @@ export default function GudangPage() {
                 )}
 
                 {/* Row 3: Stok Fisik & Harga Jual Barang */}
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns:
-                      addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
-                        ? '1fr 1fr 1fr'
-                        : '1fr 1fr',
-                    gap: '16px',
-                  }}
-                >
+                <div className={addForm.kategori === 'BOX' || addForm.kategori === 'TABLET' ? 'gudang-form-row-3col' : 'gudang-form-row-equal'}>
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">
                       {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'

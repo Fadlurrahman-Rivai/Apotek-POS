@@ -447,7 +447,7 @@ export default function PosPage() {
         </div>
 
         {/* Right Side: Keranjang Kasir & Pembayaran */}
-        <div className="pos-cart">
+        <div id="pos-cart-section" className="pos-cart">
           <div className="pos-cart-header">
             <span>Keranjang Belanja</span>
             <span className="badge badge-info">{cart.length} Item</span>
@@ -604,6 +604,41 @@ export default function PosPage() {
           </div>
         </div>
       </div>
+
+      {/* Floating Mobile Quick-Cart Bar */}
+      {cart.length > 0 && (
+        <div
+          className="pos-mobile-cart-bar"
+          onClick={() => {
+            document.getElementById('pos-cart-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Lihat keranjang belanja dan bayar"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span
+              className="badge"
+              style={{
+                background: 'rgba(255, 255, 255, 0.25)',
+                color: '#ffffff',
+                fontWeight: 700,
+                padding: '3px 8px',
+                borderRadius: '6px',
+              }}
+            >
+              {cart.length} Item
+            </span>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>{formatRupiah(totalAmount)}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600 }}>
+            <span>Lihat Keranjang &amp; Bayar</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+      )}
 
       {/* Modal Cetak Struk */}
       {showReceipt && completedSale && (
