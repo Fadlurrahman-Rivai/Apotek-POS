@@ -16,7 +16,6 @@ const DEFAULT_COLUMNS = [
   'Stok Strip',
   'Harga Jual',
   'Tanggal Exp',
-  'Kondisi',
 ];
 
 const DEFAULT_ROWS: Record<string, any>[] = [
@@ -505,7 +504,7 @@ export default function GudangPage() {
     ];
     const extraCols: Record<string, string> = {};
     allColumns.forEach((c) => {
-      if (!standardCols.includes(c) && c !== '_rowId' && !/kode|batch|rak|pbf/i.test(c)) {
+      if (!standardCols.includes(c) && c !== '_rowId' && !/kode|batch|rak|pbf|kondisi/i.test(c)) {
         extraCols[c] = '';
       }
     });
@@ -574,7 +573,7 @@ export default function GudangPage() {
       'Tanggal Exp': addForm.tanggalExp,
       'Lokasi Rak': isBox ? 'Rak Box / Strip Utama' : 'Gudang Utama',
       'PBF Distributor': '-',
-      'Kondisi': addForm.kondisi,
+      'Kondisi': 'Baik',
       ...addForm.extraFields,
     };
 
@@ -587,7 +586,6 @@ export default function GudangPage() {
       'Stok Strip',
       'Harga Jual',
       'Tanggal Exp',
-      'Kondisi',
     ];
     let nextAllCols = [...allColumns];
     let nextSelCols = [...selectedColumns];
@@ -2077,35 +2075,18 @@ export default function GudangPage() {
                   )}
                 </div>
 
-                {/* Row 4: Tanggal Exp & Kondisi */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">
-                      Tanggal Kadaluarsa (Exp Date) <span style={{ color: 'var(--red-500)' }}>*</span>
-                    </label>
-                    <input
-                      type="date"
-                      className="form-input"
-                      value={addForm.tanggalExp}
-                      onChange={(e) => setAddForm((prev) => ({ ...prev, tanggalExp: e.target.value }))}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Kondisi Barang</label>
-                    <select
-                      className="form-input"
-                      value={addForm.kondisi}
-                      onChange={(e) => setAddForm((prev) => ({ ...prev, kondisi: e.target.value }))}
-                    >
-                      <option value="Baik">Baik (Segel Aman)</option>
-                      <option value="Suhu Terjaga">Suhu Terjaga (Kulkas 2-8°C)</option>
-                      <option value="Segel Terbuka">Segel Terbuka</option>
-                      <option value="Rusak">Rusak</option>
-                      <option value="Karantina">Karantina</option>
-                    </select>
-                  </div>
+                {/* Row 4: Tanggal Exp */}
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">
+                    Tanggal Kadaluarsa (Exp Date) <span style={{ color: 'var(--red-500)' }}>*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={addForm.tanggalExp}
+                    onChange={(e) => setAddForm((prev) => ({ ...prev, tanggalExp: e.target.value }))}
+                    required
+                  />
                 </div>
 
                 {/* Section: Sinkronisasi ke POS / Kasir */}
