@@ -20,10 +20,8 @@ const DEFAULT_COLUMNS = [
 
 const DEFAULT_ROWS: Record<string, any>[] = [
   {
-    'Kode Barang': 'OBT-001',
     'Nama Barang': 'Paracetamol 500mg',
     'Kategori': 'BOX',
-    'No Batch': 'PCT-2026-A1',
     'Stok Fisik': 50,
     'Satuan': 'Box',
     'Stok Strip': 0,
@@ -31,15 +29,10 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 45000,
     'Harga Jual Strip': 5000,
     'Tanggal Exp': '2027-09-07',
-    'Lokasi Rak': 'Rak A-01 (Box)',
-    'PBF Distributor': 'PT Kimia Farma',
-    'Kondisi': 'Baik',
   },
   {
-    'Kode Barang': 'OBT-002',
     'Nama Barang': 'Amoxicillin 500mg',
     'Kategori': 'BOX',
-    'No Batch': 'AMX-2026-B2',
     'Stok Fisik': 30,
     'Satuan': 'Box',
     'Stok Strip': 0,
@@ -47,15 +40,10 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 60000,
     'Harga Jual Strip': 6500,
     'Tanggal Exp': '2027-07-09',
-    'Lokasi Rak': 'Rak A-02 (Box)',
-    'PBF Distributor': 'PT Kalbe Farma',
-    'Kondisi': 'Baik',
   },
   {
-    'Kode Barang': 'OBT-003',
     'Nama Barang': 'CTM 4mg (Chlorpheniramine)',
     'Kategori': 'BOX',
-    'No Batch': 'CTM-2026-C1',
     'Stok Fisik': 100,
     'Satuan': 'Box',
     'Stok Strip': 0,
@@ -63,15 +51,10 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 25000,
     'Harga Jual Strip': 3000,
     'Tanggal Exp': '2027-03-11',
-    'Lokasi Rak': 'Rak A-03 (Box)',
-    'PBF Distributor': 'PT Bernofarm',
-    'Kondisi': 'Baik',
   },
   {
-    'Kode Barang': 'OBT-004',
     'Nama Barang': 'Sanmol Sirup 60ml',
     'Kategori': 'SIRUP',
-    'No Batch': 'SNM-2026-S1',
     'Stok Fisik': 60,
     'Satuan': 'Botol',
     'Stok Strip': 0,
@@ -79,15 +62,10 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 22000,
     'Harga Jual Strip': 0,
     'Tanggal Exp': '2026-11-20',
-    'Lokasi Rak': 'Rak B-01 (Sirup)',
-    'PBF Distributor': 'PT Sanbe Farma',
-    'Kondisi': 'Baik',
   },
   {
-    'Kode Barang': 'OBT-005',
     'Nama Barang': 'Bioplacenton Gel 15g',
     'Kategori': 'SALEP',
-    'No Batch': 'BPL-2026-G1',
     'Stok Fisik': 45,
     'Satuan': 'Tube',
     'Stok Strip': 0,
@@ -95,15 +73,10 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 28000,
     'Harga Jual Strip': 0,
     'Tanggal Exp': '2027-06-15',
-    'Lokasi Rak': 'Rak C-01 (Salep & Gel)',
-    'PBF Distributor': 'PT Kalbe Farma',
-    'Kondisi': 'Baik',
   },
   {
-    'Kode Barang': 'OBT-006',
     'Nama Barang': 'Betadine Antiseptik 30ml',
     'Kategori': 'TETES',
-    'No Batch': 'BTD-2026-X1',
     'Stok Fisik': 80,
     'Satuan': 'Botol',
     'Stok Strip': 0,
@@ -111,9 +84,6 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 35000,
     'Harga Jual Strip': 0,
     'Tanggal Exp': '2028-01-10',
-    'Lokasi Rak': 'Rak C-02 (Cairan Luar)',
-    'PBF Distributor': 'PT Mahakam Beta Farma',
-    'Kondisi': 'Baik',
   },
 ];
 
@@ -786,7 +756,6 @@ export default function GudangPage() {
         'Harga Jual': 45000,
         'Harga Jual Strip': 5000,
         'Tanggal Exp': '2027-12-31',
-        'Kondisi': 'Baik',
       },
       {
         'Nama Barang': 'Amoxicillin 500mg',
@@ -798,7 +767,17 @@ export default function GudangPage() {
         'Harga Jual': 60000,
         'Harga Jual Strip': 6500,
         'Tanggal Exp': '2027-08-20',
-        'Kondisi': 'Baik',
+      },
+      {
+        'Nama Barang': 'CTM 4mg (Chlorpheniramine)',
+        'Kategori': 'BOX',
+        'Stok Fisik': 100,
+        'Satuan': 'Box',
+        'Stok Strip': 0,
+        'Isi Strip per Box': 10,
+        'Harga Jual': 25000,
+        'Harga Jual Strip': 3000,
+        'Tanggal Exp': '2027-03-11',
       },
       {
         'Nama Barang': 'Sanmol Sirup 60ml',
@@ -810,11 +789,44 @@ export default function GudangPage() {
         'Harga Jual': 22000,
         'Harga Jual Strip': 0,
         'Tanggal Exp': '2027-04-15',
-        'Kondisi': 'Baik',
+      },
+      {
+        'Nama Barang': 'Bioplacenton Gel 15g',
+        'Kategori': 'SALEP',
+        'Stok Fisik': 25,
+        'Satuan': 'Tube',
+        'Stok Strip': 0,
+        'Isi Strip per Box': 0,
+        'Harga Jual': 28000,
+        'Harga Jual Strip': 0,
+        'Tanggal Exp': '2027-06-15',
+      },
+      {
+        'Nama Barang': 'Betadine Antiseptik 30ml',
+        'Kategori': 'TETES',
+        'Stok Fisik': 35,
+        'Satuan': 'Botol',
+        'Stok Strip': 0,
+        'Isi Strip per Box': 0,
+        'Harga Jual': 35000,
+        'Harga Jual Strip': 0,
+        'Tanggal Exp': '2028-01-10',
       },
     ];
 
     const worksheet = XLSX.utils.json_to_sheet(templateData);
+    worksheet['!cols'] = [
+      { wch: 28 }, // Nama Barang
+      { wch: 12 }, // Kategori
+      { wch: 12 }, // Stok Fisik
+      { wch: 10 }, // Satuan
+      { wch: 12 }, // Stok Strip
+      { wch: 16 }, // Isi Strip per Box
+      { wch: 14 }, // Harga Jual
+      { wch: 16 }, // Harga Jual Strip
+      { wch: 14 }, // Tanggal Exp
+    ];
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Gudang');
     XLSX.writeFile(workbook, 'template_data_gudang_apotek.xlsx');
