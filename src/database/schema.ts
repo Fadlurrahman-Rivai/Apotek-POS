@@ -7,6 +7,7 @@
 
 export enum MedicineCategory {
   TABLET = 'TABLET',
+  BOX = 'BOX',
   SIRUP = 'SIRUP',
   SALEP = 'SALEP',
   KAPSUL = 'KAPSUL',

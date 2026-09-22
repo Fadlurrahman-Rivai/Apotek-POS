@@ -23,7 +23,7 @@ const DEFAULT_ROWS: Record<string, any>[] = [
   {
     'Kode Barang': 'OBT-001',
     'Nama Barang': 'Paracetamol 500mg',
-    'Kategori': 'TABLET',
+    'Kategori': 'BOX',
     'No Batch': 'PCT-2026-A1',
     'Stok Fisik': 50,
     'Satuan': 'Box',
@@ -32,14 +32,14 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 45000,
     'Harga Jual Strip': 5000,
     'Tanggal Exp': '2027-09-07',
-    'Lokasi Rak': 'Rak A-01 (Tablet)',
+    'Lokasi Rak': 'Rak A-01 (Box)',
     'PBF Distributor': 'PT Kimia Farma',
     'Kondisi': 'Baik',
   },
   {
     'Kode Barang': 'OBT-002',
     'Nama Barang': 'Amoxicillin 500mg',
-    'Kategori': 'TABLET',
+    'Kategori': 'BOX',
     'No Batch': 'AMX-2026-B2',
     'Stok Fisik': 30,
     'Satuan': 'Box',
@@ -48,14 +48,14 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 60000,
     'Harga Jual Strip': 6500,
     'Tanggal Exp': '2027-07-09',
-    'Lokasi Rak': 'Rak A-02 (Tablet)',
+    'Lokasi Rak': 'Rak A-02 (Box)',
     'PBF Distributor': 'PT Kalbe Farma',
     'Kondisi': 'Baik',
   },
   {
     'Kode Barang': 'OBT-003',
     'Nama Barang': 'CTM 4mg (Chlorpheniramine)',
-    'Kategori': 'TABLET',
+    'Kategori': 'BOX',
     'No Batch': 'CTM-2026-C1',
     'Stok Fisik': 100,
     'Satuan': 'Box',
@@ -64,7 +64,7 @@ const DEFAULT_ROWS: Record<string, any>[] = [
     'Harga Jual': 25000,
     'Harga Jual Strip': 3000,
     'Tanggal Exp': '2027-03-11',
-    'Lokasi Rak': 'Rak A-03 (Tablet)',
+    'Lokasi Rak': 'Rak A-03 (Box)',
     'PBF Distributor': 'PT Bernofarm',
     'Kondisi': 'Baik',
   },
@@ -151,7 +151,7 @@ export default function GudangPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({
     namaBarang: '',
-    kategori: 'TABLET',
+    kategori: 'BOX',
     satuan: 'Box',
     isiStripPerBox: 10,
     stokFisik: 20 as number | string,
@@ -512,7 +512,7 @@ export default function GudangPage() {
 
     setAddForm({
       namaBarang: '',
-      kategori: 'TABLET',
+      kategori: 'BOX',
       satuan: 'Box',
       isiStripPerBox: 10,
       stokFisik: 20,
@@ -551,10 +551,10 @@ export default function GudangPage() {
       return;
     }
 
-    const isTablet = addForm.kategori === 'TABLET';
-    const satuanFinal = isTablet ? 'Box' : (addForm.satuan.trim() || 'Pcs');
-    const stripsPerBoxFinal = isTablet ? (parseInt(String(addForm.isiStripPerBox), 10) || 10) : 0;
-    const hargaJualStripFinal = isTablet
+    const isBox = addForm.kategori === 'BOX' || addForm.kategori === 'TABLET';
+    const satuanFinal = isBox ? 'Box' : (addForm.satuan.trim() || 'Pcs');
+    const stripsPerBoxFinal = isBox ? (parseInt(String(addForm.isiStripPerBox), 10) || 10) : 0;
+    const hargaJualStripFinal = isBox
       ? (parseFloat(String(addForm.hargaJualStrip)) || Math.round(hargaJualNum / stripsPerBoxFinal))
       : 0;
 
@@ -572,7 +572,7 @@ export default function GudangPage() {
       'Harga Jual': hargaJualNum,
       'Harga Jual Strip': hargaJualStripFinal,
       'Tanggal Exp': addForm.tanggalExp,
-      'Lokasi Rak': isTablet ? 'Rak Tablet Utama' : 'Gudang Utama',
+      'Lokasi Rak': isBox ? 'Rak Box / Strip Utama' : 'Gudang Utama',
       'PBF Distributor': '-',
       'Kondisi': addForm.kondisi,
       ...addForm.extraFields,
@@ -612,17 +612,17 @@ export default function GudangPage() {
         const newMedicine: Medicine = {
           id: medId,
           name: newRow['Nama Barang'],
-          category: (newRow['Kategori'] as MedicineCategory) || MedicineCategory.TABLET,
-          baseUnit: isTablet ? 'Biji' : satuanFinal,
-          secondaryUnit: isTablet ? 'Strip' : null,
-          tertiaryUnit: isTablet ? 'Box' : null,
-          piecesPerSecondary: isTablet ? 10 : null,
-          secondaryPerTertiary: isTablet ? stripsPerBoxFinal : null,
+          category: (newRow['Kategori'] as MedicineCategory) || MedicineCategory.BOX,
+          baseUnit: isBox ? 'Biji' : satuanFinal,
+          secondaryUnit: isBox ? 'Strip' : null,
+          tertiaryUnit: isBox ? 'Box' : null,
+          piecesPerSecondary: isBox ? 10 : null,
+          secondaryPerTertiary: isBox ? stripsPerBoxFinal : null,
           buyPrice: Math.round(hargaJualNum * 0.75), // estimasi modal jika tidak diinput
           sellPrice: hargaJualNum,
-          sellPriceSecondary: isTablet ? hargaJualStripFinal : null,
-          sellPriceBase: isTablet ? Math.round(hargaJualStripFinal / 10) : hargaJualNum,
-          minStock: isTablet ? 5 : 10,
+          sellPriceSecondary: isBox ? hargaJualStripFinal : null,
+          sellPriceBase: isBox ? Math.round(hargaJualStripFinal / 10) : hargaJualNum,
+          minStock: isBox ? 5 : 10,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -633,7 +633,7 @@ export default function GudangPage() {
           medicineId: medId,
           batchNumber: newRow['No Batch'],
           expiryDate: newRow['Tanggal Exp'],
-          totalBaseQty: isTablet ? stokNum * stripsPerBoxFinal * 10 : stokNum,
+          totalBaseQty: isBox ? stokNum * stripsPerBoxFinal * 10 : stokNum,
           supplierName: 'Gudang Utama',
           receivedDate: new Date().toISOString().split('T')[0],
           status: BatchStatus.ACTIVE,
@@ -780,7 +780,7 @@ export default function GudangPage() {
     const templateData = [
       {
         'Nama Barang': 'Paracetamol 500mg',
-        'Kategori': 'TABLET',
+        'Kategori': 'BOX',
         'Stok Fisik': 50,
         'Satuan': 'Box',
         'Stok Strip': 0,
@@ -792,7 +792,7 @@ export default function GudangPage() {
       },
       {
         'Nama Barang': 'Amoxicillin 500mg',
-        'Kategori': 'TABLET',
+        'Kategori': 'BOX',
         'Stok Fisik': 30,
         'Satuan': 'Box',
         'Stok Strip': 0,
@@ -870,7 +870,7 @@ export default function GudangPage() {
         <div className="page-header-info">
           <h1>Manajemen Stok Gudang</h1>
           <p>
-            Pusat data stok fisik gudang apotek. Obat tablet dikemas dalam satuan <strong>Box</strong> dan dapat di-<strong>Buka Box</strong> menjadi <strong>Strip</strong> untuk etalase penjualan.
+            Pusat data stok fisik gudang apotek. Obat kemasan <strong>Box</strong> dapat di-<strong>Buka Box</strong> menjadi <strong>Strip</strong> untuk etalase penjualan.
           </p>
         </div>
         <div className="page-header-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1363,7 +1363,11 @@ export default function GudangPage() {
                   ) : (
                     filteredRows.map((row, idx) => {
                       const isSelected = selectedRowIds.has(row._rowId);
-                      const isBox = row['Satuan'] === 'Box' || row['Kategori'] === 'TABLET' || Boolean(row['Isi Strip per Box']);
+                      const isBox =
+                        row['Satuan'] === 'Box' ||
+                        row['Kategori'] === 'BOX' ||
+                        row['Kategori'] === 'TABLET' ||
+                        Boolean(row['Isi Strip per Box']);
                       const currentBoxQty = Number(row['Stok Fisik'] || 0);
 
                       return (
@@ -1518,7 +1522,7 @@ export default function GudangPage() {
             }}
           >
             <div>
-              Obat tablet otomatis dikemas per <strong>Box</strong>. Gunakan tombol <strong>&quot;📦 Buka Box&quot;</strong> untuk memecah 1 Box menjadi Strip.
+              Obat kemasan Box otomatis dikemas per <strong>Box</strong>. Gunakan tombol <strong>&quot;📦 Buka Box&quot;</strong> untuk memecah 1 Box menjadi Strip.
             </div>
             <div>
               <Link href="/inventory" style={{ color: 'var(--teal-600)', fontWeight: 600 }}>
@@ -1872,11 +1876,11 @@ export default function GudangPage() {
                       value={addForm.kategori}
                       onChange={(e) => {
                         const newCat = e.target.value;
-                        const isTablet = newCat === 'TABLET';
+                        const isBox = newCat === 'BOX' || newCat === 'TABLET';
                         setAddForm((prev) => ({
                           ...prev,
                           kategori: newCat,
-                          satuan: isTablet
+                          satuan: isBox
                             ? 'Box'
                             : newCat === 'SIRUP'
                             ? 'Botol'
@@ -1888,7 +1892,7 @@ export default function GudangPage() {
                         }));
                       }}
                     >
-                      <option value="TABLET">TABLET</option>
+                      <option value="BOX">BOX</option>
                       <option value="SIRUP">SIRUP</option>
                       <option value="SALEP">SALEP</option>
                       <option value="KAPSUL">KAPSUL</option>
@@ -1900,8 +1904,8 @@ export default function GudangPage() {
                   </div>
                 </div>
 
-                {/* Row 2: Satuan & Pengaturan Tablet / Box */}
-                {addForm.kategori === 'TABLET' ? (
+                {/* Row 2: Satuan & Pengaturan Box / Strip */}
+                {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET' ? (
                   <div
                     style={{
                       background: 'var(--teal-50)',
@@ -1913,7 +1917,7 @@ export default function GudangPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label" style={{ fontWeight: 600, color: 'var(--teal-900)' }}>
-                          Satuan Kemasan Tablet
+                          Satuan Kemasan Box
                         </label>
                         <div
                           style={{
@@ -1997,20 +2001,29 @@ export default function GudangPage() {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: addForm.kategori === 'TABLET' ? '1fr 1fr 1fr' : '1fr 1fr',
+                    gridTemplateColumns:
+                      addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
+                        ? '1fr 1fr 1fr'
+                        : '1fr 1fr',
                     gap: '16px',
                   }}
                 >
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">
-                      {addForm.kategori === 'TABLET' ? 'Stok Fisik (Box)' : 'Stok Fisik'}{' '}
+                      {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
+                        ? 'Stok Fisik (Box)'
+                        : 'Stok Fisik'}{' '}
                       <span style={{ color: 'var(--red-500)' }}>*</span>
                     </label>
                     <input
                       type="number"
                       min="0"
                       className="form-input"
-                      placeholder={addForm.kategori === 'TABLET' ? 'e.g. 20' : 'e.g. 50'}
+                      placeholder={
+                        addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
+                          ? 'e.g. 20'
+                          : 'e.g. 50'
+                      }
                       value={addForm.stokFisik}
                       onChange={(e) => setAddForm((prev) => ({ ...prev, stokFisik: e.target.value }))}
                       required
@@ -2019,7 +2032,9 @@ export default function GudangPage() {
 
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">
-                      {addForm.kategori === 'TABLET' ? 'Harga Jual per Box (Rp)' : 'Harga Jual Barang (Rp)'}{' '}
+                      {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
+                        ? 'Harga Jual per Box (Rp)'
+                        : 'Harga Jual Barang (Rp)'}{' '}
                       <span style={{ color: 'var(--red-500)' }}>*</span>
                     </label>
                     <input
@@ -2045,7 +2060,7 @@ export default function GudangPage() {
                     />
                   </div>
 
-                  {addForm.kategori === 'TABLET' && (
+                  {(addForm.kategori === 'BOX' || addForm.kategori === 'TABLET') && (
                     <div className="form-group" style={{ margin: 0 }}>
                       <label className="form-label">Harga Jual per Strip (Rp)</label>
                       <input

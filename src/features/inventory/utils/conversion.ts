@@ -147,6 +147,7 @@ export function getPrescriptionUnits(medicine: Medicine): string[] {
   const cat = (medicine.category || '').toUpperCase();
 
   if (
+    cat === 'BOX' ||
     cat === 'TABLET' ||
     cat === 'KAPSUL' ||
     u === 'TABLET' ||
