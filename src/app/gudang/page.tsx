@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
 import { generateId, formatRupiah } from '@/lib/formatters';
-import { initDB, addMedicine, addBatch, addMutation, getMedicines } from '@/database/db';
+import { initDB, addMedicine, addBatch, addMutation, getMedicines, clearAllData } from '@/database/db';
 import { Medicine, StockBatch, MedicineCategory, BatchStatus, MutationType } from '@/database/schema';
 
 // Data bawaan awal gudang (default sample)
@@ -18,74 +18,7 @@ const DEFAULT_COLUMNS = [
   'Tanggal Exp',
 ];
 
-const DEFAULT_ROWS: Record<string, any>[] = [
-  {
-    'Nama Barang': 'Paracetamol 500mg',
-    'Kategori': 'BOX',
-    'Stok Fisik': 50,
-    'Satuan': 'Box',
-    'Stok Strip': 0,
-    'Isi Strip per Box': 10,
-    'Harga Jual': 45000,
-    'Harga Jual Strip': 5000,
-    'Tanggal Exp': '2027-09-07',
-  },
-  {
-    'Nama Barang': 'Amoxicillin 500mg',
-    'Kategori': 'BOX',
-    'Stok Fisik': 30,
-    'Satuan': 'Box',
-    'Stok Strip': 0,
-    'Isi Strip per Box': 10,
-    'Harga Jual': 60000,
-    'Harga Jual Strip': 6500,
-    'Tanggal Exp': '2027-07-09',
-  },
-  {
-    'Nama Barang': 'CTM 4mg (Chlorpheniramine)',
-    'Kategori': 'BOX',
-    'Stok Fisik': 100,
-    'Satuan': 'Box',
-    'Stok Strip': 0,
-    'Isi Strip per Box': 10,
-    'Harga Jual': 25000,
-    'Harga Jual Strip': 3000,
-    'Tanggal Exp': '2027-03-11',
-  },
-  {
-    'Nama Barang': 'Sanmol Sirup 60ml',
-    'Kategori': 'SIRUP',
-    'Stok Fisik': 60,
-    'Satuan': 'Botol',
-    'Stok Strip': 0,
-    'Isi Strip per Box': 0,
-    'Harga Jual': 22000,
-    'Harga Jual Strip': 0,
-    'Tanggal Exp': '2026-11-20',
-  },
-  {
-    'Nama Barang': 'Bioplacenton Gel 15g',
-    'Kategori': 'SALEP',
-    'Stok Fisik': 45,
-    'Satuan': 'Tube',
-    'Stok Strip': 0,
-    'Isi Strip per Box': 0,
-    'Harga Jual': 28000,
-    'Harga Jual Strip': 0,
-    'Tanggal Exp': '2027-06-15',
-  },
-  {
-    'Nama Barang': 'Betadine Antiseptik 30ml',
-    'Kategori': 'TETES',
-    'Stok Fisik': 80,
-    'Satuan': 'Botol',
-    'Stok Strip': 0,
-    'Isi Strip per Box': 0,
-    'Harga Jual': 35000,
-    'Harga Jual Strip': 0,
-    'Tanggal Exp': '2028-01-10',
-  },
-];
+const DEFAULT_ROWS: Record<string, any>[] = [];
 
 const STORAGE_KEYS = {
   rows: 'apotek_gudang_rows',
@@ -160,6 +93,17 @@ export default function GudangPage() {
     if (typeof window === 'undefined') return;
 
     try {
+      const PURGE_KEY = 'apotek_clean_slate_v1';
+      if (!localStorage.getItem(PURGE_KEY)) {
+        clearAllData();
+        setRows([]);
+        setAllColumns(DEFAULT_COLUMNS);
+        setSelectedColumns(DEFAULT_COLUMNS);
+        setFileName('Data Master Gudang');
+        setLastImportedTime(new Date().toISOString());
+        return;
+      }
+
       const storedRows = localStorage.getItem(STORAGE_KEYS.rows);
       const storedAllCols = localStorage.getItem(STORAGE_KEYS.allCols);
       const storedSelectedCols = localStorage.getItem(STORAGE_KEYS.selectedCols);
@@ -184,23 +128,15 @@ export default function GudangPage() {
         setFileName(storedFileName || 'Data Gudang');
         setLastImportedTime(storedTime || '');
       } else {
-        const defaultRowsWithId = DEFAULT_ROWS.map((r, idx) => ({
-          _rowId: `default_${idx}_${Date.now()}`,
-          ...r,
-        }));
-        setRows(defaultRowsWithId);
+        setRows([]);
         setAllColumns(DEFAULT_COLUMNS);
         setSelectedColumns(DEFAULT_COLUMNS);
-        setFileName('Data Master Gudang (Default)');
+        setFileName('Data Master Gudang');
         setLastImportedTime(new Date().toISOString());
       }
     } catch (e) {
       console.error('Error loading warehouse data:', e);
-      const defaultRowsWithId = DEFAULT_ROWS.map((r, idx) => ({
-        _rowId: `default_${idx}_${Date.now()}`,
-        ...r,
-      }));
-      setRows(defaultRowsWithId);
+      setRows([]);
       setAllColumns(DEFAULT_COLUMNS);
       setSelectedColumns(DEFAULT_COLUMNS);
     }

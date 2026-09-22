@@ -39,18 +39,34 @@ function setStore<T>(key: string, data: T[]): void {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+const PURGE_KEY = 'apotek_clean_slate_v1';
+
+export function clearAllData(): void {
+  if (typeof window === 'undefined') return;
+  setStore(KEYS.medicines, []);
+  setStore(KEYS.batches, []);
+  setStore(KEYS.mutations, []);
+  setStore(KEYS.sales, []);
+  setStore(KEYS.saleItems, []);
+  localStorage.setItem('apotek_gudang_rows', JSON.stringify([]));
+  localStorage.setItem('apotek_gudang_file_name', 'Data Master Gudang');
+  localStorage.setItem(KEYS.seeded, 'true');
+  localStorage.setItem(PURGE_KEY, 'true');
+}
+
 // ── Initialize / Seed ──
 
 export function initDB(): void {
   if (typeof window === 'undefined') return;
 
+  // Satu kali pembersihan total data dummy lama bagi user yang sudah deploy
+  if (!localStorage.getItem(PURGE_KEY)) {
+    clearAllData();
+    return;
+  }
+
   if (!localStorage.getItem(KEYS.seeded)) {
-    setStore(KEYS.medicines, seedMedicines);
-    setStore(KEYS.batches, seedBatches);
-    setStore(KEYS.mutations, seedMutations);
-    setStore(KEYS.sales, seedSales);
-    setStore(KEYS.saleItems, seedSaleItems);
-    localStorage.setItem(KEYS.seeded, 'true');
+    clearAllData();
     return;
   }
 
