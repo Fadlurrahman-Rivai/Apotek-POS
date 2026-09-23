@@ -14,15 +14,29 @@ import {
   MutationType,
 } from '@/database/schema';
 
+const DEFAULT_SUPABASE_URL = 'https://xchgghsomfsuhnapndkh.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjaGdnaHNvbWZzdWhuYXBuZGtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNDY4MzgsImV4cCI6MjEwNTcyMjgzOH0.oMT21Ne-0GvzoP-ry__UBht99DlVzYoScRPPOVcNTa4';
+
 const STORAGE_KEYS = {
   url: 'apotek_supabase_url',
   key: 'apotek_supabase_key',
+  disconnected: 'apotek_supabase_disconnected',
 };
 
-// Ambil URL dan Key dari Environment Variable atau LocalStorage
+// Ambil URL dan Key dari Environment Variable atau Default Project
 export function getSupabaseCredentials(): { url: string; key: string } {
-  let url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  if (typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEYS.disconnected) === 'true') {
+    const localUrl = localStorage.getItem(STORAGE_KEYS.url);
+    const localKey = localStorage.getItem(STORAGE_KEYS.key);
+    if (localUrl && localKey) {
+      return { url: localUrl.trim(), key: localKey.trim() };
+    }
+    return { url: '', key: '' };
+  }
+
+  let url = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  let key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
 
   if (typeof window !== 'undefined') {
     const localUrl = localStorage.getItem(STORAGE_KEYS.url);
@@ -73,9 +87,11 @@ export function isSupabaseReady(): boolean {
 export function saveSupabaseCredentials(url: string, key: string): void {
   if (typeof window === 'undefined') return;
   if (!url || !key) {
+    localStorage.setItem(STORAGE_KEYS.disconnected, 'true');
     localStorage.removeItem(STORAGE_KEYS.url);
     localStorage.removeItem(STORAGE_KEYS.key);
   } else {
+    localStorage.removeItem(STORAGE_KEYS.disconnected);
     localStorage.setItem(STORAGE_KEYS.url, url.trim());
     localStorage.setItem(STORAGE_KEYS.key, key.trim());
   }
