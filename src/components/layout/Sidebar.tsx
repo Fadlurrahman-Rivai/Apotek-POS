@@ -149,38 +149,40 @@ export default function Sidebar() {
           </div>
         </Link>
 
-        {/* Database Status Button Mobile */}
-        <button
-          type="button"
-          onClick={() => setShowDbModal(true)}
-          style={{
-            background: isDbConnected ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-            border: `1px solid ${isDbConnected ? 'rgba(34, 197, 94, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
-            borderRadius: '16px',
-            padding: '3px 8px',
-            fontSize: '0.72rem',
-            fontWeight: 600,
-            color: isDbConnected ? '#15803d' : '#b45309',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            cursor: 'pointer',
-            marginLeft: 'auto',
-            marginRight: '6px',
-          }}
-          title={isDbConnected ? 'Database Cloud Supabase Terhubung' : 'Mode Penyimpanan Lokal - Klik untuk Hubungkan Cloud'}
-        >
-          <span
+        {/* Database Status Button Mobile (Khusus Admin) */}
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={() => setShowDbModal(true)}
             style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              background: isDbConnected ? '#22c55e' : '#f59e0b',
-              boxShadow: isDbConnected ? '0 0 6px rgba(34, 197, 94, 0.8)' : 'none',
+              background: isDbConnected ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+              border: `1px solid ${isDbConnected ? 'rgba(34, 197, 94, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
+              borderRadius: '16px',
+              padding: '3px 8px',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              color: isDbConnected ? '#15803d' : '#b45309',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              cursor: 'pointer',
+              marginLeft: 'auto',
+              marginRight: '6px',
             }}
-          />
-          <span>{isDbConnected ? '1 DB' : 'Lokal'}</span>
-        </button>
+            title={isDbConnected ? 'Database Cloud Supabase Terhubung' : 'Mode Penyimpanan Lokal - Klik untuk Hubungkan Cloud'}
+          >
+            <span
+              style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                background: isDbConnected ? '#22c55e' : '#f59e0b',
+                boxShadow: isDbConnected ? '0 0 6px rgba(34, 197, 94, 0.8)' : 'none',
+              }}
+            />
+            <span>{isDbConnected ? '1 DB' : 'Lokal'}</span>
+          </button>
+        )}
 
         {user && (
           <div className="mobile-top-user">
@@ -387,48 +389,50 @@ export default function Sidebar() {
             </div>
           )}
 
-          {/* Tombol Status & Konfigurasi Database Cloud (1 DB) */}
-          <button
-            type="button"
-            onClick={() => setShowDbModal(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '7px 10px',
-              background: isDbConnected ? 'rgba(34, 197, 94, 0.12)' : 'rgba(245, 158, 11, 0.12)',
-              border: `1px solid ${isDbConnected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-              borderRadius: '8px',
-              color: isDbConnected ? '#86efac' : '#fde047',
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              width: '100%',
-              textAlign: 'left',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span
-                style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  background: isDbConnected ? '#22c55e' : '#f59e0b',
-                  boxShadow: isDbConnected ? '0 0 6px rgba(34, 197, 94, 0.8)' : 'none',
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {isDbConnected ? 'Database Cloud (1 DB)' : 'Hubungkan Cloud DB'}
-              </span>
-            </div>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}>
-              <ellipse cx="12" cy="5" rx="9" ry="3" />
-              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-            </svg>
-          </button>
+          {/* Tombol Status & Konfigurasi Database Cloud (1 DB) - Khusus Admin */}
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setShowDbModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '7px 10px',
+                background: isDbConnected ? 'rgba(34, 197, 94, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                border: `1px solid ${isDbConnected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+                borderRadius: '8px',
+                color: isDbConnected ? '#86efac' : '#fde047',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                width: '100%',
+                textAlign: 'left',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: isDbConnected ? '#22c55e' : '#f59e0b',
+                    boxShadow: isDbConnected ? '0 0 6px rgba(34, 197, 94, 0.8)' : 'none',
+                    flexShrink: 0,
+                  }}
+                />
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {isDbConnected ? 'Database Cloud (1 DB)' : 'Hubungkan Cloud DB'}
+                </span>
+              </div>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0 }}>
+                <ellipse cx="12" cy="5" rx="9" ry="3" />
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+              </svg>
+            </button>
+          )}
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--slate-400)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -440,14 +444,16 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* Modal Konfigurasi Database Supabase */}
-      <DatabaseConfigModal
-        isOpen={showDbModal}
-        onClose={() => {
-          setShowDbModal(false);
-          setIsDbConnected(isSupabaseReady());
-        }}
-      />
+      {/* Modal Konfigurasi Database Supabase (Khusus Admin) */}
+      {isAdmin && (
+        <DatabaseConfigModal
+          isOpen={showDbModal}
+          onClose={() => {
+            setShowDbModal(false);
+            setIsDbConnected(isSupabaseReady());
+          }}
+        />
+      )}
     </>
   );
 }

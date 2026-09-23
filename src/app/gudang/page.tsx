@@ -8,6 +8,7 @@ import { initDB, addMedicine, addBatch, addMutation, getMedicines, clearAllData 
 import { Medicine, StockBatch, MedicineCategory, BatchStatus, MutationType } from '@/database/schema';
 import DatabaseConfigModal from '@/components/common/DatabaseConfigModal';
 import { isSupabaseReady, cloudFetchWarehouse, cloudSaveWarehouse } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 // Data bawaan awal gudang (default sample)
 const DEFAULT_COLUMNS = [
@@ -31,6 +32,7 @@ const STORAGE_KEYS = {
 };
 
 export default function GudangPage() {
+  const { isAdmin } = useAuth();
   const [rows, setRows] = useState<Record<string, any>[]>([]);
   const [allColumns, setAllColumns] = useState<string[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -864,33 +866,35 @@ export default function GudangPage() {
             style={{ display: 'none' }}
           />
 
-          {/* Tombol Database Cloud (1 DB) */}
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setShowDbModal(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              borderColor: isDbConnected ? 'var(--teal-400)' : 'var(--amber-300)',
-              background: isDbConnected ? 'var(--teal-50)' : '#fef3c7',
-              color: isDbConnected ? 'var(--teal-900)' : '#92400e',
-              fontWeight: 600,
-            }}
-            title={isDbConnected ? 'Database Cloud Supabase Terhubung - Data sama di semua perangkat' : 'Klik untuk hubungkan 1 Database Online'}
-          >
-            <span
+          {/* Tombol Database Cloud (1 DB) - Khusus Admin */}
+          {isAdmin && (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowDbModal(true)}
               style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: isDbConnected ? '#22c55e' : '#f59e0b',
-                boxShadow: isDbConnected ? '0 0 6px rgba(34, 197, 94, 0.8)' : 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                borderColor: isDbConnected ? 'var(--teal-400)' : 'var(--amber-300)',
+                background: isDbConnected ? 'var(--teal-50)' : '#fef3c7',
+                color: isDbConnected ? 'var(--teal-900)' : '#92400e',
+                fontWeight: 600,
               }}
-            />
-            <span>{isDbConnected ? '☁️ 1 Database Aktif' : '☁️ Hubungkan 1 Database'}</span>
-          </button>
+              title={isDbConnected ? 'Database Cloud Supabase Terhubung - Data sama di semua perangkat' : 'Klik untuk hubungkan 1 Database Online'}
+            >
+              <span
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: isDbConnected ? '#22c55e' : '#f59e0b',
+                  boxShadow: isDbConnected ? '0 0 6px rgba(34, 197, 94, 0.8)' : 'none',
+                }}
+              />
+              <span>{isDbConnected ? '☁️ 1 Database Aktif' : '☁️ Hubungkan 1 Database'}</span>
+            </button>
+          )}
 
           {/* Tombol Tambah Obat Manual */}
           <button
@@ -2340,15 +2344,17 @@ export default function GudangPage() {
         </div>
       )}
 
-      {/* Modal Konfigurasi Database Supabase */}
-      <DatabaseConfigModal
-        isOpen={showDbModal}
-        onClose={() => {
-          setShowDbModal(false);
-          setIsDbConnected(isSupabaseReady());
-          loadData();
-        }}
-      />
+      {/* Modal Konfigurasi Database Supabase (Khusus Admin) */}
+      {isAdmin && (
+        <DatabaseConfigModal
+          isOpen={showDbModal}
+          onClose={() => {
+            setShowDbModal(false);
+            setIsDbConnected(isSupabaseReady());
+            loadData();
+          }}
+        />
+      )}
     </div>
   );
 }
