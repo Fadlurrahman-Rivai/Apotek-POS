@@ -11,6 +11,7 @@ import {
   addSaleItems,
   addMutation,
   getSales,
+  completeSale,
   initDB,
 } from '@/database/db';
 import {
@@ -146,6 +147,9 @@ export default function PosPage() {
   useEffect(() => {
     initDB();
     refreshData();
+    const handleSync = () => refreshData();
+    window.addEventListener('apotek-cloud-synced', handleSync);
+    return () => window.removeEventListener('apotek-cloud-synced', handleSync);
   }, []);
 
   const refreshData = () => {
@@ -325,7 +329,6 @@ export default function PosPage() {
       changeAmount,
       createdAt: new Date().toISOString(),
     };
-    addSale(newSale);
 
     // 2. Simpan Detail Item & Potong Stok Menggunakan FEFO
     const saleItemsToSave: SaleItem[] = [];
@@ -360,7 +363,7 @@ export default function PosPage() {
       });
     }
 
-    addSaleItems(saleItemsToSave);
+    completeSale(newSale, saleItemsToSave);
 
     // Set struk
     setCompletedSale({

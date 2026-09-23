@@ -20,10 +20,16 @@ export default function DashboardPage() {
 
   useEffect(() => {
     initDB();
-    setMedicines(getMedicines());
-    setBatches(getBatches());
-    setTodaySales(getTodaySales());
+    const loadState = () => {
+      setMedicines(getMedicines());
+      setBatches(getBatches());
+      setTodaySales(getTodaySales());
+    };
+    loadState();
     setMounted(true);
+
+    window.addEventListener('apotek-cloud-synced', loadState);
+    return () => window.removeEventListener('apotek-cloud-synced', loadState);
   }, []);
 
   if (!mounted) {

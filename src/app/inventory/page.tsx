@@ -50,6 +50,9 @@ export default function InventoryPage() {
   useEffect(() => {
     initDB();
     refreshData();
+    const handleSync = () => refreshData();
+    window.addEventListener('apotek-cloud-synced', handleSync);
+    return () => window.removeEventListener('apotek-cloud-synced', handleSync);
   }, []);
 
   const refreshData = () => {

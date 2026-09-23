@@ -1,5 +1,5 @@
 // ============================================================
-// DB — localStorage CRUD helpers
+// DB — Local cache & Supabase Cloud Synchronization
 // ============================================================
 
 import {
@@ -18,6 +18,19 @@ import {
   seedSaleItems,
 } from './seed';
 import { daysUntilExpiry } from '@/lib/formatters';
+import {
+  cloudFetchMedicines,
+  cloudUpsertMedicine,
+  cloudDeleteMedicine,
+  cloudFetchBatches,
+  cloudUpsertBatch,
+  cloudFetchMutations,
+  cloudAddMutation,
+  cloudFetchSales,
+  cloudFetchSaleItems,
+  cloudSaveSale,
+  isSupabaseReady,
+} from '@/lib/supabase';
 
 const KEYS = {
   medicines: 'apotek_medicines',
@@ -54,6 +67,54 @@ export function clearAllData(): void {
   localStorage.setItem(PURGE_KEY, 'true');
 }
 
+// ── Cloud Synchronization ──
+
+export async function syncFromCloud(): Promise<boolean> {
+  if (typeof window === 'undefined') return false;
+  if (!isSupabaseReady()) return false;
+
+  try {
+    const [cloudMeds, cloudBatches, cloudMutations, cloudSales, cloudItems] = await Promise.all([
+      cloudFetchMedicines(),
+      cloudFetchBatches(),
+      cloudFetchMutations(),
+      cloudFetchSales(),
+      cloudFetchSaleItems(),
+    ]);
+
+    let changed = false;
+
+    if (cloudMeds !== null) {
+      setStore(KEYS.medicines, cloudMeds);
+      changed = true;
+    }
+    if (cloudBatches !== null) {
+      setStore(KEYS.batches, cloudBatches);
+      changed = true;
+    }
+    if (cloudMutations !== null) {
+      setStore(KEYS.mutations, cloudMutations);
+      changed = true;
+    }
+    if (cloudSales !== null) {
+      setStore(KEYS.sales, cloudSales);
+      changed = true;
+    }
+    if (cloudItems !== null) {
+      setStore(KEYS.saleItems, cloudItems);
+      changed = true;
+    }
+
+    if (changed && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('apotek-cloud-synced'));
+    }
+    return true;
+  } catch (err) {
+    console.error('syncFromCloud error:', err);
+    return false;
+  }
+}
+
 // ── Initialize / Seed ──
 
 export function initDB(): void {
@@ -62,12 +123,13 @@ export function initDB(): void {
   // Satu kali pembersihan total data dummy lama bagi user yang sudah deploy
   if (!localStorage.getItem(PURGE_KEY)) {
     clearAllData();
-    return;
+  } else if (!localStorage.getItem(KEYS.seeded)) {
+    clearAllData();
   }
 
-  if (!localStorage.getItem(KEYS.seeded)) {
-    clearAllData();
-    return;
+  // Jika Supabase terhubung, jalankan sinkronisasi awan di background
+  if (isSupabaseReady()) {
+    syncFromCloud();
   }
 
   // Migrasi otomatis data lama: ubah baseUnit 'Tablet' menjadi 'Biji'
@@ -107,6 +169,10 @@ export function addMedicine(med: Medicine): void {
   const all = getMedicines();
   all.push(med);
   setStore(KEYS.medicines, all);
+
+  if (isSupabaseReady()) {
+    cloudUpsertMedicine(med);
+  }
 }
 
 export function updateMedicine(id: string, updates: Partial<Medicine>): void {
@@ -115,6 +181,10 @@ export function updateMedicine(id: string, updates: Partial<Medicine>): void {
   if (idx === -1) return;
   all[idx] = { ...all[idx], ...updates, updatedAt: new Date().toISOString() };
   setStore(KEYS.medicines, all);
+
+  if (isSupabaseReady()) {
+    cloudUpsertMedicine(all[idx]);
+  }
 }
 
 export function deleteMedicine(id: string): void {
@@ -122,6 +192,10 @@ export function deleteMedicine(id: string): void {
     KEYS.medicines,
     getMedicines().filter((m) => m.id !== id)
   );
+
+  if (isSupabaseReady()) {
+    cloudDeleteMedicine(id);
+  }
 }
 
 // ── StockBatches ──
@@ -138,6 +212,10 @@ export function addBatch(batch: StockBatch): void {
   const all = getBatches();
   all.push(batch);
   setStore(KEYS.batches, all);
+
+  if (isSupabaseReady()) {
+    cloudUpsertBatch(batch);
+  }
 }
 
 export function updateBatch(id: string, updates: Partial<StockBatch>): void {
@@ -146,6 +224,10 @@ export function updateBatch(id: string, updates: Partial<StockBatch>): void {
   if (idx === -1) return;
   all[idx] = { ...all[idx], ...updates };
   setStore(KEYS.batches, all);
+
+  if (isSupabaseReady()) {
+    cloudUpsertBatch(all[idx]);
+  }
 }
 
 /**
@@ -159,6 +241,11 @@ export function reduceStock(batchId: string, baseQty: number): boolean {
   if (all[idx].totalBaseQty < baseQty) return false;
   all[idx].totalBaseQty -= baseQty;
   setStore(KEYS.batches, all);
+
+  if (isSupabaseReady()) {
+    cloudUpsertBatch(all[idx]);
+  }
+
   return true;
 }
 
@@ -207,6 +294,14 @@ export function deductStockFEFO(
   if (remaining > 0) return null;
 
   setStore(KEYS.batches, all);
+
+  if (isSupabaseReady()) {
+    deductions.forEach((d) => {
+      const updated = all.find((b) => b.id === d.batchId);
+      if (updated) cloudUpsertBatch(updated);
+    });
+  }
+
   return deductions;
 }
 
@@ -257,6 +352,10 @@ export function addMutation(mutation: StockMutation): void {
   const all = getMutations();
   all.push(mutation);
   setStore(KEYS.mutations, all);
+
+  if (isSupabaseReady()) {
+    cloudAddMutation(mutation);
+  }
 }
 
 // ── Sales ──
@@ -296,6 +395,18 @@ export function addSaleItems(items: SaleItem[]): void {
   const all = getSaleItems();
   all.push(...items);
   setStore(KEYS.saleItems, all);
+}
+
+/**
+ * Selesaikan transaksi penjualan dan sinkronkan struk & item ke cloud
+ */
+export function completeSale(sale: Sale, items: SaleItem[]): void {
+  addSale(sale);
+  addSaleItems(items);
+
+  if (isSupabaseReady()) {
+    cloudSaveSale(sale, items);
+  }
 }
 
 /**

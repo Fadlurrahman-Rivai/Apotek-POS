@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { generateId, formatRupiah } from '@/lib/formatters';
 import { initDB, addMedicine, addBatch, addMutation, getMedicines, clearAllData } from '@/database/db';
 import { Medicine, StockBatch, MedicineCategory, BatchStatus, MutationType } from '@/database/schema';
+import DatabaseConfigModal from '@/components/common/DatabaseConfigModal';
+import { isSupabaseReady, cloudFetchWarehouse, cloudSaveWarehouse } from '@/lib/supabase';
 
 // Data bawaan awal gudang (default sample)
 const DEFAULT_COLUMNS = [
@@ -80,8 +82,19 @@ export default function GudangPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Modal Database Cloud State
+  const [showDbModal, setShowDbModal] = useState(false);
+  const [isDbConnected, setIsDbConnected] = useState(false);
+
   useEffect(() => {
+    setIsDbConnected(isSupabaseReady());
     loadData();
+    const handleSync = () => {
+      setIsDbConnected(isSupabaseReady());
+      loadData();
+    };
+    window.addEventListener('apotek-cloud-synced', handleSync);
+    return () => window.removeEventListener('apotek-cloud-synced', handleSync);
   }, []);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
@@ -134,6 +147,25 @@ export default function GudangPage() {
         setFileName('Data Master Gudang');
         setLastImportedTime(new Date().toISOString());
       }
+
+      // Jika Supabase terhubung, ambil data terbaru dari cloud database
+      if (isSupabaseReady()) {
+        cloudFetchWarehouse().then((cloudData) => {
+          if (cloudData && cloudData.rows) {
+            setRows(cloudData.rows);
+            if (cloudData.allColumns.length > 0) setAllColumns(cloudData.allColumns);
+            if (cloudData.selectedColumns.length > 0) setSelectedColumns(cloudData.selectedColumns);
+            if (cloudData.fileName) setFileName(cloudData.fileName);
+            if (cloudData.importTime) setLastImportedTime(cloudData.importTime);
+
+            localStorage.setItem(STORAGE_KEYS.rows, JSON.stringify(cloudData.rows));
+            if (cloudData.allColumns.length > 0) localStorage.setItem(STORAGE_KEYS.allCols, JSON.stringify(cloudData.allColumns));
+            if (cloudData.selectedColumns.length > 0) localStorage.setItem(STORAGE_KEYS.selectedCols, JSON.stringify(cloudData.selectedColumns));
+            if (cloudData.fileName) localStorage.setItem(STORAGE_KEYS.fileName, cloudData.fileName);
+            if (cloudData.importTime) localStorage.setItem(STORAGE_KEYS.importTime, cloudData.importTime);
+          }
+        });
+      }
     } catch (e) {
       console.error('Error loading warehouse data:', e);
       setRows([]);
@@ -167,6 +199,10 @@ export default function GudangPage() {
     setSelectedColumns(selCols);
     setFileName(name);
     setLastImportedTime(now);
+
+    if (isSupabaseReady()) {
+      cloudSaveWarehouse(rowsWithId, allCols, selCols, name);
+    }
   };
 
   // Toggle pilihan kolom yang tampil di halaman gudang
@@ -827,6 +863,34 @@ export default function GudangPage() {
             accept=".xlsx, .xls, .csv"
             style={{ display: 'none' }}
           />
+
+          {/* Tombol Database Cloud (1 DB) */}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setShowDbModal(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderColor: isDbConnected ? 'var(--teal-400)' : 'var(--amber-300)',
+              background: isDbConnected ? 'var(--teal-50)' : '#fef3c7',
+              color: isDbConnected ? 'var(--teal-900)' : '#92400e',
+              fontWeight: 600,
+            }}
+            title={isDbConnected ? 'Database Cloud Supabase Terhubung - Data sama di semua perangkat' : 'Klik untuk hubungkan 1 Database Online'}
+          >
+            <span
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: isDbConnected ? '#22c55e' : '#f59e0b',
+                boxShadow: isDbConnected ? '0 0 6px rgba(34, 197, 94, 0.8)' : 'none',
+              }}
+            />
+            <span>{isDbConnected ? '☁️ 1 Database Aktif' : '☁️ Hubungkan 1 Database'}</span>
+          </button>
 
           {/* Tombol Tambah Obat Manual */}
           <button
@@ -2275,6 +2339,16 @@ export default function GudangPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Konfigurasi Database Supabase */}
+      <DatabaseConfigModal
+        isOpen={showDbModal}
+        onClose={() => {
+          setShowDbModal(false);
+          setIsDbConnected(isSupabaseReady());
+          loadData();
+        }}
+      />
     </div>
   );
 }
