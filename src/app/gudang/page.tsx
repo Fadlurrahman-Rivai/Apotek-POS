@@ -17,6 +17,7 @@ const DEFAULT_COLUMNS = [
   'Stok Fisik',
   'Satuan',
   'Stok Strip',
+  'Harga Modal',
   'Harga Jual',
   'Tanggal Exp',
 ];
@@ -59,8 +60,9 @@ export default function GudangPage() {
     namaBarang: '',
     kategori: 'BOX',
     satuan: 'Box',
-    isiStripPerBox: 10,
+    isiStripPerBox: 10 as number | string,
     stokFisik: 20 as number | string,
+    hargaModal: 35000 as number | string,
     hargaJual: 50000 as number | string,
     hargaJualStrip: 5000 as number | string,
     tanggalExp: '',
@@ -442,7 +444,9 @@ export default function GudangPage() {
       'Stok Fisik',
       'Satuan',
       'Stok Strip',
+      'Harga Modal',
       'Harga Jual',
+      'Harga Jual Strip',
       'Tanggal Exp',
       'Kondisi',
     ];
@@ -459,6 +463,7 @@ export default function GudangPage() {
       satuan: 'Box',
       isiStripPerBox: 10,
       stokFisik: 20,
+      hargaModal: 35000,
       hargaJual: 50000,
       hargaJualStrip: 5000,
       tanggalExp: expStr,
@@ -483,6 +488,12 @@ export default function GudangPage() {
       return;
     }
 
+    const hargaModalNum = parseFloat(String(addForm.hargaModal)) || 0;
+    if (isNaN(hargaModalNum) || hargaModalNum < 0) {
+      showNotification('error', 'Harga modal harus berupa angka valid (minimal 0)!');
+      return;
+    }
+
     const hargaJualNum = parseFloat(String(addForm.hargaJual));
     if (isNaN(hargaJualNum) || hargaJualNum < 0) {
       showNotification('error', 'Harga jual harus berupa angka valid!');
@@ -497,8 +508,9 @@ export default function GudangPage() {
     const isBox = addForm.kategori === 'BOX' || addForm.kategori === 'TABLET';
     const satuanFinal = isBox ? 'Box' : (addForm.satuan.trim() || 'Pcs');
     const stripsPerBoxFinal = isBox ? (parseInt(String(addForm.isiStripPerBox), 10) || 10) : 0;
+    // Setiap harga tidak saling terkait satu sama lain, murni berdasarkan input pengguna
     const hargaJualStripFinal = isBox
-      ? (parseFloat(String(addForm.hargaJualStrip)) || Math.round(hargaJualNum / stripsPerBoxFinal))
+      ? (parseFloat(String(addForm.hargaJualStrip)) || 0)
       : 0;
 
     const newRowId = `manual_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
@@ -512,6 +524,7 @@ export default function GudangPage() {
       'Satuan': satuanFinal,
       'Stok Strip': 0,
       'Isi Strip per Box': stripsPerBoxFinal,
+      'Harga Modal': hargaModalNum,
       'Harga Jual': hargaJualNum,
       'Harga Jual Strip': hargaJualStripFinal,
       'Tanggal Exp': addForm.tanggalExp,
@@ -528,6 +541,7 @@ export default function GudangPage() {
       'Stok Fisik',
       'Satuan',
       'Stok Strip',
+      'Harga Modal',
       'Harga Jual',
       'Tanggal Exp',
     ];
@@ -560,7 +574,7 @@ export default function GudangPage() {
           tertiaryUnit: isBox ? 'Box' : null,
           piecesPerSecondary: isBox ? 10 : null,
           secondaryPerTertiary: isBox ? stripsPerBoxFinal : null,
-          buyPrice: Math.round(hargaJualNum * 0.75), // estimasi modal jika tidak diinput
+          buyPrice: hargaModalNum, // Menggunakan harga modal langsung dari inputan pengguna
           sellPrice: hargaJualNum,
           sellPriceSecondary: isBox ? hargaJualStripFinal : null,
           sellPriceBase: isBox ? Math.round(hargaJualStripFinal / 10) : hargaJualNum,
@@ -727,6 +741,7 @@ export default function GudangPage() {
         'Satuan': 'Box',
         'Stok Strip': 0,
         'Isi Strip per Box': 10,
+        'Harga Modal': 32000,
         'Harga Jual': 45000,
         'Harga Jual Strip': 5000,
         'Tanggal Exp': '2027-12-31',
@@ -738,6 +753,7 @@ export default function GudangPage() {
         'Satuan': 'Box',
         'Stok Strip': 0,
         'Isi Strip per Box': 10,
+        'Harga Modal': 45000,
         'Harga Jual': 60000,
         'Harga Jual Strip': 6500,
         'Tanggal Exp': '2027-08-20',
@@ -749,6 +765,7 @@ export default function GudangPage() {
         'Satuan': 'Box',
         'Stok Strip': 0,
         'Isi Strip per Box': 10,
+        'Harga Modal': 18000,
         'Harga Jual': 25000,
         'Harga Jual Strip': 3000,
         'Tanggal Exp': '2027-03-11',
@@ -760,6 +777,7 @@ export default function GudangPage() {
         'Satuan': 'Botol',
         'Stok Strip': 0,
         'Isi Strip per Box': 0,
+        'Harga Modal': 17000,
         'Harga Jual': 22000,
         'Harga Jual Strip': 0,
         'Tanggal Exp': '2027-04-15',
@@ -771,6 +789,7 @@ export default function GudangPage() {
         'Satuan': 'Tube',
         'Stok Strip': 0,
         'Isi Strip per Box': 0,
+        'Harga Modal': 21000,
         'Harga Jual': 28000,
         'Harga Jual Strip': 0,
         'Tanggal Exp': '2027-06-15',
@@ -782,6 +801,7 @@ export default function GudangPage() {
         'Satuan': 'Botol',
         'Stok Strip': 0,
         'Isi Strip per Box': 0,
+        'Harga Modal': 27000,
         'Harga Jual': 35000,
         'Harga Jual Strip': 0,
         'Tanggal Exp': '2028-01-10',
@@ -796,6 +816,7 @@ export default function GudangPage() {
       { wch: 10 }, // Satuan
       { wch: 12 }, // Stok Strip
       { wch: 16 }, // Isi Strip per Box
+      { wch: 14 }, // Harga Modal
       { wch: 14 }, // Harga Jual
       { wch: 16 }, // Harga Jual Strip
       { wch: 14 }, // Tanggal Exp
@@ -1417,6 +1438,7 @@ export default function GudangPage() {
 
                             const isStok = /stok fisik/i.test(col);
                             const isStokStrip = /stok strip/i.test(col);
+                            const isHargaModal = /harga modal|harga beli|^modal$/i.test(col);
                             const isHargaJual = /harga jual/i.test(col);
                             const isExp = /exp|kadaluwarsa|expired/i.test(col);
                             const isKondisi = /kondisi|status/i.test(col);
@@ -1438,6 +1460,14 @@ export default function GudangPage() {
                                   <span style={{ fontWeight: 600, color: Number(displayVal) > 0 ? 'var(--blue-700)' : 'var(--slate-400)' }}>
                                     {displayVal !== '-' ? `${displayVal} Strip` : '-'}
                                   </span>
+                                ) : isHargaModal ? (
+                                  <div>
+                                    <span style={{ fontWeight: 600, color: 'var(--amber-700, #b45309)' }}>
+                                      {rawVal !== undefined && rawVal !== null && !isNaN(Number(rawVal))
+                                        ? formatRupiah(Number(rawVal))
+                                        : displayVal}
+                                    </span>
+                                  </div>
                                 ) : isHargaJual ? (
                                   <div>
                                     <span style={{ fontWeight: 600, color: 'var(--teal-700)' }}>
@@ -1964,19 +1994,12 @@ export default function GudangPage() {
                             className="form-input"
                             placeholder="10"
                             value={addForm.isiStripPerBox}
-                            onChange={(e) => {
-                              const strips = parseInt(e.target.value, 10) || 1;
-                              setAddForm((prev) => {
-                                const hargaBox = Number(prev.hargaJual) || 0;
-                                const hargaStrip =
-                                  hargaBox > 0 ? Math.round(hargaBox / strips) : prev.hargaJualStrip;
-                                return {
-                                  ...prev,
-                                  isiStripPerBox: strips,
-                                  hargaJualStrip: hargaStrip,
-                                };
-                              });
-                            }}
+                            onChange={(e) =>
+                              setAddForm((prev) => ({
+                                ...prev,
+                                isiStripPerBox: e.target.value,
+                              }))
+                            }
                             required
                           />
                           <span style={{ fontSize: '0.857rem', color: 'var(--slate-600)', whiteSpace: 'nowrap' }}>
@@ -2011,8 +2034,8 @@ export default function GudangPage() {
                   </div>
                 )}
 
-                {/* Row 3: Stok Fisik & Harga Jual Barang */}
-                <div className={addForm.kategori === 'BOX' || addForm.kategori === 'TABLET' ? 'gudang-form-row-3col' : 'gudang-form-row-equal'}>
+                {/* Row 3: Stok Fisik & Tanggal Kadaluarsa */}
+                <div className="gudang-form-row-equal">
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">
                       {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
@@ -2037,63 +2060,84 @@ export default function GudangPage() {
 
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">
-                      {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
-                        ? 'Harga Jual per Box (Rp)'
-                        : 'Harga Jual Barang (Rp)'}{' '}
-                      <span style={{ color: 'var(--red-500)' }}>*</span>
+                      Tanggal Kadaluarsa (Exp Date) <span style={{ color: 'var(--red-500)' }}>*</span>
                     </label>
                     <input
-                      type="number"
-                      min="0"
+                      type="date"
                       className="form-input"
-                      placeholder="e.g. 50000"
-                      value={addForm.hargaJual}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setAddForm((prev) => {
-                          const hargaBox = Number(val) || 0;
-                          const strips = Number(prev.isiStripPerBox) || 10;
-                          return {
-                            ...prev,
-                            hargaJual: val,
-                            hargaJualStrip:
-                              hargaBox > 0 ? Math.round(hargaBox / strips) : prev.hargaJualStrip,
-                          };
-                        });
-                      }}
+                      value={addForm.tanggalExp}
+                      onChange={(e) => setAddForm((prev) => ({ ...prev, tanggalExp: e.target.value }))}
                       required
                     />
                   </div>
+                </div>
 
-                  {(addForm.kategori === 'BOX' || addForm.kategori === 'TABLET') && (
+                {/* Row 4: Pengaturan Harga Bebas & Mandiri */}
+                <div
+                  style={{
+                    background: 'var(--slate-50)',
+                    border: '1px solid var(--slate-200)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '14px 16px',
+                  }}
+                >
+                  <div style={{ marginBottom: '10px' }}>
+                    <span style={{ fontSize: '0.857rem', fontWeight: 700, color: 'var(--slate-700)' }}>
+                      💰 Pengaturan Harga (Input Bebas &amp; Tidak Saling Terkait)
+                    </span>
+                  </div>
+
+                  <div className={addForm.kategori === 'BOX' || addForm.kategori === 'TABLET' ? 'gudang-form-row-3col' : 'gudang-form-row-equal'}>
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label">Harga Jual per Strip (Rp)</label>
+                      <label className="form-label">
+                        {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
+                          ? 'Harga Modal per Box (Rp)'
+                          : 'Harga Modal (Rp)'}{' '}
+                        <span style={{ color: 'var(--red-500)' }}>*</span>
+                      </label>
                       <input
                         type="number"
                         min="0"
                         className="form-input"
-                        placeholder="e.g. 5000"
-                        value={addForm.hargaJualStrip}
-                        onChange={(e) =>
-                          setAddForm((prev) => ({ ...prev, hargaJualStrip: e.target.value }))
-                        }
+                        placeholder="e.g. 35000"
+                        value={addForm.hargaModal}
+                        onChange={(e) => setAddForm((prev) => ({ ...prev, hargaModal: e.target.value }))}
+                        required
                       />
                     </div>
-                  )}
-                </div>
 
-                {/* Row 4: Tanggal Exp */}
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">
-                    Tanggal Kadaluarsa (Exp Date) <span style={{ color: 'var(--red-500)' }}>*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={addForm.tanggalExp}
-                    onChange={(e) => setAddForm((prev) => ({ ...prev, tanggalExp: e.target.value }))}
-                    required
-                  />
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label className="form-label">
+                        {addForm.kategori === 'BOX' || addForm.kategori === 'TABLET'
+                          ? 'Harga Jual per Box (Rp)'
+                          : 'Harga Jual Barang (Rp)'}{' '}
+                        <span style={{ color: 'var(--red-500)' }}>*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="form-input"
+                        placeholder="e.g. 50000"
+                        value={addForm.hargaJual}
+                        onChange={(e) => setAddForm((prev) => ({ ...prev, hargaJual: e.target.value }))}
+                        required
+                      />
+                    </div>
+
+                    {(addForm.kategori === 'BOX' || addForm.kategori === 'TABLET') && (
+                      <div className="form-group" style={{ margin: 0 }}>
+                        <label className="form-label">Harga Jual per Strip (Rp)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          className="form-input"
+                          placeholder="e.g. 5000"
+                          value={addForm.hargaJualStrip}
+                          onChange={(e) => setAddForm((prev) => ({ ...prev, hargaJualStrip: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Section: Sinkronisasi ke POS / Kasir */}
